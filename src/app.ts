@@ -8,8 +8,9 @@ const app: Application = express();
 
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { userRoute } from "./modules/user/user.route";
 import { issueRoute } from "./modules/issues/issue.route";
+import globalErrorHandler from "./middlewares/globalErrorHandler";
+import { authRoute } from "./modules/auth/auth.route";
 
 dotenv.config();
 
@@ -29,9 +30,12 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // user routes
-app.use("/api/auth", userRoute);
+app.use("/api/auth", authRoute);
 
 // issue-routes
 app.use("/api/issues", issueRoute);
+
+// Global Error Handling Middleware
+app.use(globalErrorHandler);
 
 export default app;

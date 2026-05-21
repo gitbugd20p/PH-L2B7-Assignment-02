@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { userServices } from "./user.service";
 import sendResponse from "../../utility/sendResponse";
+import { authServices } from "./auth.service";
 
-const getAllUser = async (req: Request, res: Response) => {
+const createUser = async (req: Request, res: Response) => {
     try {
-        const result = await userServices.createUserIntoDB(req.body);
+        const result = await authServices.createUserIntoDB(req.body);
 
         sendResponse(res, {
             statusCode: 201,
@@ -22,6 +22,6 @@ const getAllUser = async (req: Request, res: Response) => {
     }
 };
 
-export const userController = {
-    getAllUser,
+export const authController = {
+    createUser,
 };
