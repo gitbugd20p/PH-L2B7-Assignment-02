@@ -9,6 +9,7 @@ const app: Application = express();
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { userRoute } from "./modules/user/user.route";
+import { issueRoute } from "./modules/issues/issue.route";
 
 dotenv.config();
 
@@ -29,5 +30,8 @@ app.get("/", (req: Request, res: Response) => {
 
 // user routes
 app.use("/api/auth", userRoute);
+
+// issue-routes
+app.use("/api/issues", issueRoute);
 
 export default app;
