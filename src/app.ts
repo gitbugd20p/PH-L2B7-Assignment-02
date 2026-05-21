@@ -8,6 +8,7 @@ const app: Application = express();
 
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import { userRoute } from "./modules/user/user.route";
 
 dotenv.config();
 
@@ -23,7 +24,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.get("/", (req: Request, res: Response) => {
-    res.send("Hello, Welcome to DevPulse API Endpoints!");
+    res.send("DevPulse Server Running!");
 });
+
+// user routes
+app.use("/api/auth", userRoute);
 
 export default app;
