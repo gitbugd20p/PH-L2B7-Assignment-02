@@ -49,6 +49,8 @@ const authorization = (...roles: string[]) => {
                 });
             }
 
+            req.user = decoded;
+
             next();
         } catch (error) {
             next(error);
