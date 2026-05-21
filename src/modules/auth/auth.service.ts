@@ -52,7 +52,7 @@ const loginUserFromDB = async (payload: {
     } as JwtPayload;
 
     const accessToken = jwt.sign(jwtPayload, config.secret as string, {
-        expiresIn: "7d",
+        expiresIn: "3d",
     });
 
     delete user.password;

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { issueController } from "./issue.controller";
+import authorization from "../../middlewares/authorization";
 
 const router = Router();
 
@@ -7,7 +8,7 @@ const router = Router();
 router.post("/", issueController.createIssue);
 
 // get all issues
-router.get("/", issueController.getAllIssues);
+router.get("/", authorization("contributor"), issueController.getAllIssues);
 
 // get issue by id
 router.get("/:id", issueController.getSingleIssue);
