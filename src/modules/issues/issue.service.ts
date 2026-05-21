@@ -63,9 +63,27 @@ const updateIssueIntoDB = async (id: number, payload: Partial<IIssue>) => {
     return result;
 };
 
+const deleteIssueFromDB = async (id: number) => {
+    const result = await pool.query(
+        `
+        DELETE FROM issues
+        WHERE id = $1
+        RETURNING *
+        `,
+        [id],
+    );
+
+    if (result.rows.length === 0) {
+        throw new Error("Issue not found");
+    }
+
+    return result;
+};
+
 export const issueServices = {
     createIssueIntoDB,
     getAllIssuesFromDB,
     getSingleIssueFromDB,
     updateIssueIntoDB,
+    deleteIssueFromDB,
 };
