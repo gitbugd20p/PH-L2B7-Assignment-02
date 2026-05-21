@@ -9,6 +9,10 @@ router.post("/", issueController.createIssue);
 // get all issues
 router.get("/", issueController.getAllIssues);
 
+// get issue by id
 router.get("/:id", issueController.getSingleIssue);
+
+// update issue by id
+router.patch("/:id", issueController.updateIssue);
 
 export const issueRoute = router;

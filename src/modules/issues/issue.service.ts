@@ -40,8 +40,32 @@ const getSingleIssueFromDB = async (id: number) => {
     return result;
 };
 
+const updateIssueIntoDB = async (id: number, payload: Partial<IIssue>) => {
+    const result = await pool.query(
+        `
+        UPDATE issues
+        SET
+            title = COALESCE($1, title),
+            description = COALESCE($2, description),
+            type = COALESCE($3, type),
+            status = COALESCE($4, status),
+            updated_at = NOW()
+        WHERE id = $5
+        RETURNING *
+        `,
+        [payload.title, payload.description, payload.type, payload.status, id],
+    );
+
+    if (result.rows.length === 0) {
+        throw new Error("Issue not found");
+    }
+
+    return result;
+};
+
 export const issueServices = {
     createIssueIntoDB,
     getAllIssuesFromDB,
-    getSingleIssueFromDB
+    getSingleIssueFromDB,
+    updateIssueIntoDB,
 };
