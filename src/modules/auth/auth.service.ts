@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import config from "../../config";
 import { pool } from "../../db";
 import jwt, { type JwtPayload } from "jsonwebtoken";
@@ -5,11 +6,13 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 const createUserIntoDB = async (payload: any) => {
     const { name, email, password, role } = payload;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const result = await pool.query(
         `INSERT INTO users (name, email, password, role)
 			VALUES ($1, $2, $3, $4)
 			RETURNING *`,
-        [name, email, password, role],
+        [name, email, hashedPassword, role],
     );
 
     delete result.rows[0].password;
@@ -34,7 +37,9 @@ const loginUserFromDB = async (payload: {
 
     const user = userData.rows[0];
     // 2. compare the password
-    if (user.password !== password) {
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordMatch) {
         throw new Error("Password is incorrect!");
     }
 
@@ -49,8 +54,11 @@ const loginUserFromDB = async (payload: {
     const accessToken = jwt.sign(jwtPayload, config.secret as string, {
         expiresIn: "7d",
     });
+
+    delete user.password;
+
     // 4. return token
-    return { accessToken };
+    return { token: accessToken, user };
 };
 
 export const authServices = {
