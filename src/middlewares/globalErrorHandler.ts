@@ -6,11 +6,12 @@ const globalErrorHandler = (
     res: Response,
     next: NextFunction,
 ) => {
-    // console.error(err.stack); // Log the error
+    const statusCode = err.statusCode || 500;
 
-    res.status(500).json({
+    res.status(statusCode).json({
         success: false,
         message: err.message || "Internal Server Error",
+        error: err,
     });
 };
 

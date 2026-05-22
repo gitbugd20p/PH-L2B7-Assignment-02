@@ -1,4 +1,5 @@
 import { pool } from "../../db";
+import AppError from "../../errors/AppError";
 import type { IIssue } from "./issue.interface";
 
 const createIssueIntoDB = async (reporter_id: number, payload: IIssue) => {
@@ -37,6 +38,10 @@ const getSingleIssueFromDB = async (id: number) => {
         [id],
     );
 
+    if (result.rows.length === 0) {
+        throw new AppError(404, "Issue not found");
+    }
+
     return result;
 };
 
@@ -54,7 +59,7 @@ const updateIssueIntoDB = async (
     );
 
     if (existingIssueResult.rows.length === 0) {
-        throw new Error("Issue not found");
+        throw new AppError(404, "Issue not found");
     }
 
     const existingIssue = existingIssueResult.rows[0];
@@ -86,11 +91,11 @@ const updateIssueIntoDB = async (
 
     // contributor update
     if (existingIssue.reporter_id !== user.id) {
-        throw new Error("You can only update your own issues");
+        throw new AppError(403, "You can only update your own issue");
     }
 
     if (existingIssue.status !== "open") {
-        throw new Error("You can only update open issues");
+        throw new AppError(409, "You cannot update a non-open issue");
     }
 
     const result = await pool.query(
