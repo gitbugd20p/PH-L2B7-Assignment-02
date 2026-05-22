@@ -3,6 +3,7 @@ import config from "../../config";
 import { pool } from "../../db";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import AppError from "../../errors/AppError";
+import { StatusCodes } from "http-status-codes";
 
 const createUserIntoDB = async (payload: any) => {
     const { name, email, password, role } = payload;
@@ -33,7 +34,7 @@ const loginUserFromDB = async (payload: {
     ]);
 
     if (userData.rows.length === 0) {
-        throw new AppError(404, "User not found");
+        throw new AppError(StatusCodes.NOT_FOUND, "User not found");
     }
 
     const user = userData.rows[0];
@@ -41,7 +42,7 @@ const loginUserFromDB = async (payload: {
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
-        throw new AppError(401, "Password is incorrect");
+        throw new AppError(StatusCodes.UNAUTHORIZED, "Password is incorrect");
     }
 
     // 3. generate token
