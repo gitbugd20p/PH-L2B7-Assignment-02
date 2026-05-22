@@ -32,8 +32,8 @@ const getAllIssues = async (req: Request, res: Response) => {
         sendResponse(res, {
             statusCode: 200,
             success: true,
-            message: "All Issues retrieved successfully!",
-            data: result.rows,
+            message: "All Issues retrieved successfully",
+            data: result,
         });
     } catch (error: any) {
         sendResponse(res, {
@@ -55,7 +55,7 @@ const getSingleIssue = async (req: Request, res: Response) => {
             statusCode: 200,
             success: true,
             message: `Issue #${id} retrieved successfully!`,
-            data: result.rows[0],
+            data: result,
         });
     } catch (error: any) {
         sendResponse(res, {
@@ -71,7 +71,11 @@ const updateIssue = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
 
-        const result = await issueServices.updateIssueIntoDB(id, req.body, req.user);
+        const result = await issueServices.updateIssueIntoDB(
+            id,
+            req.body,
+            req.user,
+        );
 
         sendResponse(res, {
             statusCode: 200,
