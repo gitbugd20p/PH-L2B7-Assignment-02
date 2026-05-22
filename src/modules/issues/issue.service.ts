@@ -6,6 +6,13 @@ import type { IIssue } from "./issue.interface";
 const createIssueIntoDB = async (reporter_id: number, payload: IIssue) => {
     const { title, description, type } = payload;
 
+    if (description.length < 20) {
+        throw new AppError(
+            StatusCodes.BAD_REQUEST,
+            "Description should be at least 20 characters",
+        );
+    }
+
     const result = await pool.query(
         `
         INSERT INTO issues
