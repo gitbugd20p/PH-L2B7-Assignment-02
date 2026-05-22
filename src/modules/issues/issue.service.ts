@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { pool } from "../../db";
 import AppError from "../../errors/AppError";
 import type { IIssue } from "./issue.interface";
+import type { IIssueQueryParams } from "../../interfaces/issueQuery.interface";
 
 const createIssueIntoDB = async (reporter_id: number, payload: IIssue) => {
     const { title, description, type } = payload;
@@ -26,16 +27,44 @@ const createIssueIntoDB = async (reporter_id: number, payload: IIssue) => {
     return result;
 };
 
-const getAllIssuesFromDB = async () => {
-    const result = await pool.query(
-        `
-        SELECT * FROM issues
-        ORDER BY created_at DESC
-        `,
-    );
+const getAllIssuesFromDB = async (queryParams: IIssueQueryParams) => {
+    const { sort = "newest", type, status } = queryParams;
 
+    // query structure
+    let queryText = `SELECT * FROM issues`;
+    const whereConditions: string[] = [];
+    const values: string[] = [];
+
+    // filter type and status
+    if (type) {
+        values.push(type);
+        whereConditions.push(`type = $${values.length}`);
+    }
+
+    if (status) {
+        values.push(status);
+        whereConditions.push(`status = $${values.length}`);
+    }
+
+    // if those values comes adding to the query
+    if (whereConditions.length > 0) {
+        queryText += ` WHERE ${whereConditions.join(" AND ")}`;
+    }
+
+    // now applying sorting
+    if (sort === "newest") {
+        queryText += ` ORDER BY created_at DESC`;
+    } else {
+        queryText += ` ORDER BY created_at ASC`;
+    }
+
+    console.log(queryText);
+
+    const result = await pool.query(queryText, values);
+
+    // filter may result an empty array
     if (result.rows.length === 0) {
-        throw new AppError(StatusCodes.NOT_FOUND, "Issue not found");
+        return [];
     }
 
     const finalResult = await Promise.all(

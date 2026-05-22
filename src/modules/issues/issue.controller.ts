@@ -27,7 +27,7 @@ const createIssue = async (req: Request, res: Response) => {
 
 const getAllIssues = async (req: Request, res: Response) => {
     try {
-        const result = await issueServices.getAllIssuesFromDB();
+        const result = await issueServices.getAllIssuesFromDB(req.query);
 
         sendResponse(res, {
             statusCode: 200,
