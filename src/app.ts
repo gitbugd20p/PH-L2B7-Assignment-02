@@ -26,7 +26,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.get("/", (req: Request, res: Response) => {
-    res.send("DevPulse Server Running!");
+    res.send("DevPulse Servers is Running!");
 });
 
 // user routes
