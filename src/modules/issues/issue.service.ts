@@ -1,8 +1,8 @@
 import { pool } from "../../db";
 import type { IIssue } from "./issue.interface";
 
-const createIssueIntoDB = async (payload: IIssue) => {
-    const { title, description, type, reporter_id } = payload;
+const createIssueIntoDB = async (reporter_id: number, payload: IIssue) => {
+    const { title, description, type } = payload;
 
     const result = await pool.query(
         `
@@ -40,12 +40,31 @@ const getSingleIssueFromDB = async (id: number) => {
     return result;
 };
 
-const updateIssueIntoDB = async (id: number, payload: Partial<IIssue>) => {
-    const result = await pool.query(
+const updateIssueIntoDB = async (
+    id: number,
+    payload: Partial<IIssue>,
+    user: any,
+) => {
+    const existingIssueResult = await pool.query(
         `
+        SELECT * FROM issues
+        WHERE id = $1        
+        `,
+        [id],
+    );
+
+    if (existingIssueResult.rows.length === 0) {
+        throw new Error("Issue not found");
+    }
+
+    const existingIssue = existingIssueResult.rows[0];
+
+    // Maintainer update
+    if (user.role === "maintainer") {
+        const result = await pool.query(
+            `
         UPDATE issues
-        SET
-            title = COALESCE($1, title),
+        SET title = COALESCE($1, title),
             description = COALESCE($2, description),
             type = COALESCE($3, type),
             status = COALESCE($4, status),
@@ -53,12 +72,40 @@ const updateIssueIntoDB = async (id: number, payload: Partial<IIssue>) => {
         WHERE id = $5
         RETURNING *
         `,
-        [payload.title, payload.description, payload.type, payload.status, id],
-    );
+            [
+                payload.title,
+                payload.description,
+                payload.type,
+                payload.status,
+                id,
+            ],
+        );
 
-    if (result.rows.length === 0) {
-        throw new Error("Issue not found");
+        return result;
     }
+
+    // contributor update
+    if (existingIssue.reporter_id !== user.id) {
+        throw new Error("You can only update your own issues");
+    }
+
+    if (existingIssue.status !== "open") {
+        throw new Error("You can only update open issues");
+    }
+
+    const result = await pool.query(
+        `
+        UPDATE issues
+        SET
+            title = COALESCE($1, title),
+            description = COALESCE($2, description),
+            type = COALESCE($3, type),
+            updated_at = NOW()
+        WHERE id = $4
+        RETURNING *
+        `,
+        [payload.title, payload.description, payload.type, id],
+    );
 
     return result;
 };

@@ -35,7 +35,7 @@ const authorization = (...roles: string[]) => {
             if (userData.rows.length === 0) {
                 return sendResponse(res, {
                     statusCode: 404,
-                    success: true,
+                    success: false,
                     message: "User not found!",
                 });
             }

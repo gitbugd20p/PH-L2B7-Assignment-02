@@ -4,7 +4,10 @@ import { issueServices } from "./issue.service";
 
 const createIssue = async (req: Request, res: Response) => {
     try {
-        const result = await issueServices.createIssueIntoDB(req.body);
+        const result = await issueServices.createIssueIntoDB(
+            req.user!.id,
+            req.body,
+        );
 
         sendResponse(res, {
             statusCode: 201,
@@ -68,7 +71,7 @@ const updateIssue = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
 
-        const result = await issueServices.updateIssueIntoDB(id, req.body);
+        const result = await issueServices.updateIssueIntoDB(id, req.body, req.user);
 
         sendResponse(res, {
             statusCode: 200,
